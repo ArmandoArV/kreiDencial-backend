@@ -1,68 +1,92 @@
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt"); // Add bcrypt for password hashing
 const config = require("../config/jwt");
 const connection = require("../config/mysql-config");
 const { use } = require("../middleware/jwt-middleware");
 
 const getUsers = async (req, res) => {
-  const result = await connection.query("SELECT * FROM User");
-  res.json(result);
+  try {
+    const result = await connection.query("SELECT * FROM User");
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 const validateUser = async (req, res) => {
-  const username = req.body.username;
-  const result = await connection.query(
-    "SELECT * FROM User WHERE username = ?",
-    [username]
-  );
-  if (result.length > 0) {
-    res.json({ message: "User exists" });
-  } else {
-    res.json({ message: "User does not exist" });
+  try {
+    const matricula = req.body.matricula;
+    const result = await connection.query(
+      "SELECT * FROM User WHERE matricula = ?",
+      [matricula]
+    );
+    if (result.length > 0) {
+      res.json({ message: "User exists" });
+    } else {
+      res.json({ message: "User does not exist" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 const validateMatricula = async (req, res) => {
-  const matricula = req.body.matricula;
-  const result = await connection.query(
-    "SELECT * FROM User WHERE matricula = ?",
-    [matricula]
-  );
-  if (result.length > 0) {
-    res.json({ message: "Matricula exists" });
-  } else {
-    res.json({ message: "Matricula does not exist" });
+  try {
+    const matricula = req.body.matricula;
+    const result = await connection.query(
+      "SELECT * FROM User WHERE matricula = ?",
+      [matricula]
+    );
+    if (result.length > 0) {
+      res.json({ message: "Matricula exists" });
+    } else {
+      res.json({ message: "Matricula does not exist" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 const registerUser = async (req, res) => {
-  const { name, matricula, password } = req.body;
+  try {
+    const { name, lastName, matricula, password } = req.body;
 
-  const sql =
-    "INSERT INTO User (name, matricula, password) VALUES (?, ?, SHA256(?, 256))";
+    const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
 
-  const token = jwt.sign({ name, matricula }, config.secret, {
-    expiresIn: "1h",
-  });
+    const sql =
+      "INSERT INTO User (name, lastName, matricula, password) VALUES (?, ?, ?, ?)";
 
-  connection.query(sql, [name, matricula, password], async (err, result) => {
-    if (err) {
-      res.json({ message: "Error" });
-    } else {
-      res.json({
-        message: "User created",
-        token,
-      });
-    }
-  });
+    const token = jwt.sign({ name, matricula }, config.secret, {
+      expiresIn: "1h",
+    });
+
+    await connection.query(sql, [name, lastName, matricula, hashedPassword]);
+
+    res.json({
+      message: "User created",
+      token,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 const getByMatricula = async (req, res) => {
-  const matricula = req.params.matricula;
-  const result = await connection.query(
-    "SELECT * FROM User WHERE matricula = ?",
-    [matricula]
-  );
-  res.json(result);
+  try {
+    const matricula = req.params.matricula;
+    const result = await connection.query(
+      "SELECT * FROM User WHERE matricula = ?",
+      [matricula]
+    );
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 module.exports = {

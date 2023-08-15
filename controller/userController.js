@@ -31,17 +31,12 @@ const userController = {
       const sql =
         "INSERT INTO User (name, lastName, matricula, password) VALUES (?, ?, ?, ?)";
 
-      const token = jwt.sign({ name, matricula }, config.secret, {
-        expiresIn: "1h",
-      });
-
       const caseSensitive = false; // This is the property that was missing
 
       await connection.query(sql, [name, lastName, matricula, hashedPassword]);
 
       res.json({
         message: "User created",
-        token,
         caseSensitive,
       });
     } catch (error) {

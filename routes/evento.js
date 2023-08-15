@@ -1,11 +1,9 @@
 const express = require("express");
 const router = express.Router();
-// const eventoController = require("../controller/eventoController"); // Update the path accordingly
+const eventoController = require("../controller/eventoController"); // Update the path accordingly
 const middleware = require("../middleware/jwt-middleware");
 
 // Define routes for evento operations
-router.get("/eventos", middleware, eventoController.getAllEventos);
-router.get("/eventos/:id", middleware, eventoController.getEventoById);
 router.post("/eventos", middleware, eventoController.createEvento);
 router.put("/eventos/:id", middleware, eventoController.updateEvento);
 router.delete("/eventos/:id", middleware, eventoController.deleteEvento);

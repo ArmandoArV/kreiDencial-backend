@@ -20,7 +20,7 @@ const localConfig = {
   port: 3306,
 };
 
-const connection = mysql.createPool(config);
+const connection = mysql.createPool(localConfig);
 
 connection.getConnection((err, connec) => {
   if (err) {
